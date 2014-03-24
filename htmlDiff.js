@@ -26,12 +26,14 @@ function htmlDiff() {
 	  _currentHash = 44032; //朝鲜文音节 Hangul Syllables
 	};
 	
-	function html2plain(html) {
+	function html2plain(html,options) {
 	  html = html.replace(/<(S*?)[^>]*>.*?|<.*?\/>/g, function(tag){
 	    //debug:
 	    if (_is_debug) {
-	      return pushHash(tag.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+              if(options.uppercasetag)return pushHash(tag.toUpperCase().replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+              return pushHash(tag.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
 	    } else {
+              if(options.uppercasetag)return pushHash(tag.toUpperCase());
 	      return pushHash(tag);
 	    }
 	  });
@@ -58,9 +60,12 @@ function htmlDiff() {
 	  return plain;
 	}*/
 	var dmp = new diff_match_patch();
-	this.diff = function(first,second){
-		var convertedFirst =  html2plain(first);
-		var convertedSecond = html2plain(second);
+	this.diff = function(first,second,options){
+                if(typeof options!='object')options={};
+		if(typeof options.tagless!='undefined')options.tagless=false;
+	        if(typeof options.uppercasetag!='undefined')options.uppercasetag=false;
+		var convertedFirst =  html2plain(first,options);
+		var convertedSecond = html2plain(second,options);
 		var diffs = dmp.diff_main(convertedFirst,convertedSecond);
 		dmp.diff_cleanupSemantic(diffs);
 		var modified = '';
@@ -69,6 +74,7 @@ function htmlDiff() {
 			if (diff[0]==0){
 				modified += diff[1];
 			}
+			else if(options.tagless)modified += diff[1];
 			else if (diff[0]==1){
 				modified += '<ins>'+diff[1]+'</ins>';
 			}
