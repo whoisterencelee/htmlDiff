@@ -30,9 +30,9 @@ function htmlDiff() {
 	  html = html.replace(/<(S*?)[^>]*>.*?|<.*?\/>/g, function(tag){
 	    //debug:
 	    if (_is_debug) {
-	      return pushHash(tag.toUpperCase().replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+	      return pushHash(tag.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
 	    } else {
-	      return pushHash(tag.toUpperCase());
+	      return pushHash(tag);
 	    }
 	  });
 	  
