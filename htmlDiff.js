@@ -39,7 +39,7 @@ function htmlDiff() {
 	  return html;
 	}
 	function plain2html(plain) {
-		var back;
+		var back='';
 		for (i=0;i<plain.length;i++){
 			if(_revHtmlHash[plain[i]]){
 				back += _revHtmlHash[plain[i]];
