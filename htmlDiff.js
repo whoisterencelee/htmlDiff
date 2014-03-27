@@ -74,7 +74,7 @@ function htmlDiff() {
 			if (diff[0]==0){
 				modified += diff[1];
 			}
-			else if(options.tagless)modified += diff[1];
+			else if(options.tagless)modified += diff[1]; 
 			else if (diff[0]==1){
 				modified += '<ins>'+diff[1]+'</ins>';
 			}
