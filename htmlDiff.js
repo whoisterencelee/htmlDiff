@@ -62,8 +62,8 @@ function htmlDiff() {
 	var dmp = new diff_match_patch();
 	this.diff = function(first,second,options){
                 if(typeof options!='object')options={};
-		if(typeof options.tagless!='undefined')options.tagless=false;
-	        if(typeof options.uppercasetag!='undefined')options.uppercasetag=false;
+		if(typeof options.tagless=='undefined')options.tagless=false;
+	        if(typeof options.uppercasetag=='undefined')options.uppercasetag=false;
 		var convertedFirst =  html2plain(first,options);
 		var convertedSecond = html2plain(second,options);
 		var diffs = dmp.diff_main(convertedFirst,convertedSecond);
@@ -74,7 +74,7 @@ function htmlDiff() {
 			if (diff[0]==0){
 				modified += diff[1];
 			}
-			else if(options.tagless)modified += diff[1]; 
+			else if(options.tagless)modified += diff[1];
 			else if (diff[0]==1){
 				modified += '<ins>'+diff[1]+'</ins>';
 			}
