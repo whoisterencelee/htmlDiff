@@ -66,7 +66,9 @@ function htmlDiff() {
 	        if(typeof options.uppercasetag=='undefined')options.uppercasetag=false;
 		var convertedFirst =  html2plain(first,options);
 		var convertedSecond = html2plain(second,options);
-		var diffs = dmp.diff_main(convertedFirst,convertedSecond);
+		var wordtext=dmp.diff_linesToWords_(convertedFirst,convertedSecond);
+		var diffs = dmp.diff_main(wordtext[0],wordtext[1]);
+		dmp.diff_charsToLines_(diffs,wordtext[2]);
 		dmp.diff_cleanupSemantic(diffs);
 		var modified = '';
 		for (i=0;i<diffs.length;i++){
