@@ -27,7 +27,8 @@ function htmlDiff() {
 	};
 	
 	function html2plain(html,options) {
-	  html = html.replace(/<(S*?)[^>]*>.*?|<.*?\/>/g, function(tag){
+	  //html = html.replace(/<(S*?)[^>]*>.*?|<.*?\/>/g, function(tag){
+	  html = html.replace(/<[^>]*>|&\w+;|[\w|']+/g, function(tag){ // (1) tag (2) escaped characters &gt; (3) words
 	    //debug:
 	    if (_is_debug) {
               if(options.uppercasetag)return pushHash(tag.toUpperCase().replace(/</g, '&lt;').replace(/>/g, '&gt;'));
@@ -66,9 +67,7 @@ function htmlDiff() {
 	        if(typeof options.uppercasetag=='undefined')options.uppercasetag=false;
 		var convertedFirst =  html2plain(first,options);
 		var convertedSecond = html2plain(second,options);
-		var wordtext=dmp.diff_linesToWords_(convertedFirst,convertedSecond);
-		var diffs = dmp.diff_main(wordtext[0],wordtext[1]);
-		dmp.diff_charsToLines_(diffs,wordtext[2]);
+		var diffs = dmp.diff_main(convertedFirst,convertedSecond);
 		dmp.diff_cleanupSemantic(diffs);
 		var modified = '';
 		for (i=0;i<diffs.length;i++){
