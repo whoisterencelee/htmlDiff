@@ -40,50 +40,74 @@ function htmlDiff() {
 	  });
 	  
 	  return html;
-	}
-	function plain2html(plain) {
-		var back='';
-		for (i=0;i<plain.length;i++){
-			if(_revHtmlHash[plain[i]]){
-				back += _revHtmlHash[plain[i]];
-			}
-			else{
-				back += plain[i];
-			}
+	};
+	function diff2html(diff) {
+		var back='',difflength=diff.length,i=0;
+		while(difflength--){
+			var char=diff[i];
+			var word=_revHtmlHash[char];
+			if(word)back += word;
+			else back += char;
+			i++;
 		}
 		return back;
 	};	
-	/*
-	function plain2html(plain) {
-	  for(var tag in _htmlHash){
-	    plain = plain.replace(RegExp(_htmlHash[tag], 'g'), tag);
-	  }
-	  return plain;
-	}*/
+	function diff2htmlwithtag(diff, tag, datetime) {
+		var back='',word='',difflength=diff.length,i=0,tagopen=true;
+		while(difflength--){
+			var char=diff[i];
+			word=_revHtmlHash[char];
+			if(word){
+				if( /<[^>]+>/.test(word) ){// tag
+					if(!tagopen){
+						back += "</"+tag+"><wbr>";
+						tagopen=true;
+					};
+					back += word;
+					// add an inline wbr separator, bec otherwise contenteditable goes inside the tags until text node is reached, 
+					// and this gives a frustrating user experience, as you can never get into normal formatting
+				}else{ 
+					if(tagopen){
+						back += "<"+tag+" datetime='"+datetime+"'>";
+						tagopen=false;
+					};
+					back += word;
+				}
+			}else{
+				if(tagopen){
+					back += "<"+tag+" datetime='"+datetime+"'>";
+					tagopen=false;
+				};
+ 				back += char; 
+			};
+			i++;
+		}
+		if(!tagopen) back += "</"+tag+">";
+		back += "<wbr>";
+		return back;
+	};	
+	function plain2html(plain) { return diff2html(plain); };
+
 	var dmp = new diff_match_patch();
 	this.diff = function(first,second,options){
                 if(typeof options!='object')options={};
-		if(typeof options.tagless=='undefined')options.tagless=false;
+		var tagless = typeof options.tagless=='undefined' ? false : options.tagless ;
 	        if(typeof options.uppercasetag=='undefined')options.uppercasetag=false;
+		var datetime = typeof options.datetime=='undefined' ? (new Date).toISOString() : options.datetime ;
+
 		var convertedFirst =  html2plain(first,options);
 		var convertedSecond = html2plain(second,options);
 		var diffs = dmp.diff_main(convertedFirst,convertedSecond);
 		dmp.diff_cleanupSemantic(diffs);
-		var modified = '';
-		for (i=0;i<diffs.length;i++){
+
+		var modified = '',diffslength=diffs.length,i=0;
+		while(diffslength--){
 			var diff = diffs[i];
-			if (diff[0]==0){
-				modified += diff[1];
-			}
-			else if(options.tagless)modified += diff[1];
-			else if (diff[0]==1){
-				modified += '<ins>'+diff[1]+'</ins>';
-			}
-			else {
-				modified += '<del>'+diff[1]+'</del>';
-			}
+			if ( diff[0]==0 || tagless ) modified += diff2html(diff[1]);
+			else if( diff[0]==1 ) modified += diff2htmlwithtag(diff[1],'ins',datetime);// insert
+			else modified += diff2htmlwithtag(diff[1],'del',datetime);// delete
+			i++;
 		}
-		var complete = plain2html(modified);
-		return complete;
+		return modified;
 	};
 }
